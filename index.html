@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <button id="button_jogar" onclick="jogar()"> Jogar sete e meio</button> <br><br>
+
+    <div id="div_exibicao">
+        <div id="div_msm_user"></div>
+        <hr>
+        <div id="div_msm_bot"></div>
+    </div>
+
+
+</body>
+
+</html>
+
+<script>
+    // Índice 0 nome, 1 valor e 2 naipes
+    const baralho = [
+        ["Ás", "2", "3", "4", "5", "6", "7", "Valete", "Rainha", "Rei"],
+        [1, 2, 3, 4, 5, 6, 7, 0.5, 0.5, 0.5],
+        ["copas", "espadas", "ouros", "paus"]
+    ];
+
+    const msm_resultado = ['estouro', 'unanime', 'venceu'];
+
+    let carta_sorteada = '';
+    let naipe_sorteado = '';
+
+
+    let total_pontos_usuario = 0;
+    let total_pontos_bot = 0;
+
+    let resultado_user = '';
+    let resultado_bot = '';
+
+    function jogar() {
+        button_jogar.style.display = 'none';
+
+        sortear_user();
+
+        const msm = `
+            Jogador: 
+            <br>
+            (${total_pontos_usuario} pontos) - ${carta_sorteada} de ${naipe_sorteado}
+
+            <br><br>
+            
+            <div id="div_buttons">
+                <button onclick="jogar_outro()">Pedir outra carta</button>
+                <button onclick="passar()">Passar a vez</button>
+            </div>
+        `;
+
+        if (total_pontos_usuario > 7.5) {
+            resultado_user = msm_resultado[0];
+            exibir_resultados();
+        } else if (total_pontos_usuario == 7.5) resultado_user = msm_resultado[1];
+        else div_msm_user.innerHTML += msm;
+
+    }
+
+    function jogar_outro() {
+
+        div_msm_user.innerHTML = `Quero mais uma carta!<br><br>`;
+
+        setTimeout(jogar, 1000);
+    }
+
+    function sortear_user() {
+        const indice_carta_sorteado = parseInt(Math.random() * 10);
+        const indice_naipe_sorteado = parseInt(Math.random() * 4);
+
+        carta_sorteada = baralho[0][indice_carta_sorteado];
+        naipe_sorteado = baralho[2][indice_naipe_sorteado];
+
+        total_pontos_usuario += baralho[1][indice_carta_sorteado];
+
+    }
+
+
+    function passar() {
+        div_buttons.style.display = 'none';
+
+        sortear_bot();
+
+        const msm = `
+            Banca: 
+            <br>
+            (${total_pontos_bot} pontos) - ${carta_sorteada} de ${naipe_sorteado}
+        `;
+
+        div_msm_bot.innerHTML += msm;
+
+        if (total_pontos_bot <= total_pontos_usuario) setTimeout(passar_outro, 1000);
+        else if (total_pontos_bot < 7.5) {
+            resultado_bot = msm_resultado[2]
+            exibir_resultados();
+        } else {
+            resultado_bot = msm_resultado[0];
+            exibir_resultados();
+        }
+    }
+
+    function passar_outro() {
+        div_msm_bot.innerHTML = `É necessário virar outra carta para a banca!<br><br>`;
+
+        setTimeout(passar, 1000);
+    }
+
+    function sortear_bot() {
+        const indice_carta_sorteado = parseInt(Math.random() * 10);
+        const indice_naipe_sorteado = parseInt(Math.random() * 4);
+
+        carta_sorteada = baralho[0][indice_carta_sorteado];
+        naipe_sorteado = baralho[2][indice_naipe_sorteado];
+
+        total_pontos_bot += baralho[1][indice_carta_sorteado];
+
+    }
+
+
+    function exibir_resultados() {
+        let msm = '';
+
+        if (resultado_user == msm_resultado[1]) msm = `SETE E MEIO! O jogador venceu com 7.5 pontos!`;
+        else if (resultado_user == msm_resultado[0]) msm = `O JOGADOR ESTOUROU! A banca venceu com ${total_pontos_bot} pontos`;
+        else if (resultado_bot == msm_resultado[0]) msm = `A BANCA ESTOUROU! O jogador venceu com ${total_pontos_usuario} pontos!`;
+        else if (resultado_bot == msm_resultado[1]) msm = `SETE E MEIO! A banca venceu com 7.5 pontos!`;
+        else if (resultado_bot == msm_resultado[2]) msm = `A banca venceu com ${total_pontos_bot} pontos!`;
+
+        div_exibicao.innerHTML = msm + `<br><br>
+            <button id="button_jogar" onclick="location.reload()"> Jogar de novo</button> <br><br>`;
+
+    }
+</script>
